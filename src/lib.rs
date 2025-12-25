@@ -10,7 +10,7 @@
 //!
 //! In short, this crate allows to protect web resources from cross-site inclusion and abuse by validating the [Fetch Metadata] headers and ensuring that only "safe" cross-site requests are allowed. In this context, "safe" means:
 //!
-//! - the request comes from the same origin (the site's exact scheme, host, and port), same site (any subdomain of the current domain), or are user-initiated (e.g. clicking on a bookmark, directly entering the website's address), OR...
+//! - the request comes from the same origin (the site's exact scheme, host, and port), or are user-initiated (e.g. clicking on a bookmark, directly entering the website's address), OR...
 //! - the request is a simple GET request coming from a navigation event (e.g. clicking on a link on another website), as long as it's not being embedded in elements like `<object>` or `<iframe>`.
 //!
 //! <div class="warning">
@@ -120,6 +120,16 @@
 //! #
 //! SecFetchLayer::new(|policy| {
 //!     policy.reject_missing_metadata();
+//! });
+//! ```
+//!
+//! Same-site (any subdomain of the current domain) requests are not allowed by default. This can be enabled by setting the [allow_same_site](PolicyBuilder::allow_same_site) flag on the evaluation policy.
+//!
+//! ```
+//! # use tower_sec_fetch::SecFetchLayer;
+//! #
+//! SecFetchLayer::new(|policy| {
+//!     policy.allow_same_site();
 //! });
 //! ```
 //!
