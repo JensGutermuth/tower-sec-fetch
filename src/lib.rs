@@ -424,12 +424,28 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn it_allows_same_site_requests() {
-        let request = request!(site => "same-site", mode => "navigate", dest => "document");
+    async fn it_rejects_same_site_requests() {
+        let request = request!(site => "same-site", mode => "cors", dest => "empty");
 
         assert_request!(request, |response: http::Response<()>| {
-            check!(response.status().is_success());
+            check!(response.status() == StatusCode::FORBIDDEN);
         });
+    }
+
+    #[tokio::test]
+    async fn it_allows_same_site_requests_if_configured() {
+        let layer = SecFetchLayer::new(|policy| {
+            policy.allow_same_site();
+        });
+        let request = request!(site => "same-site", mode => "cors", dest => "empty");
+
+        assert_request!(
+            request,
+            |response: http::Response<()>| {
+                check!(response.status().is_success());
+            },
+            layer
+        );
     }
 
     #[tokio::test]
@@ -461,6 +477,15 @@ mod tests {
     #[tokio::test]
     async fn it_allows_navigation_requests() {
         let request = request!(site => "cross-site", mode => "navigate", dest => "document");
+
+        assert_request!(request, |response: http::Response<()>| {
+            check!(response.status().is_success());
+        });
+    }
+
+    #[tokio::test]
+    async fn it_allows_same_site_navigation_requests() {
+        let request = request!(site => "same-site", mode => "navigate", dest => "document");
 
         assert_request!(request, |response: http::Response<()>| {
             check!(response.status().is_success());
